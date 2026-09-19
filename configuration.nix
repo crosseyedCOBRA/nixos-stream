@@ -178,7 +178,16 @@
     # ingest natively (e.g. DNxHR/ProRes). Its default build already covers
     # x264/x265/VP8/VP9/AV1(decode)/Opus/AAC/MP3, plus NVENC/NVDEC since
     # this box has an NVIDIA GPU (verified in nixpkgs' ffmpeg derivation).
-    davinci-resolve
+    #
+    # davinci-resolve commented out for now: its fixed-output derivation
+    # (nixpkgs scripts Blackmagic's own download API live at build time
+    # rather than fetching a pinned tarball URL) hit a SHA256 hash
+    # mismatch building on the actual stream PC hardware. Re-enable once
+    # that's root-caused/retested -- if it's a one-time drift the pinned
+    # `outputHash` in nixpkgs' davinci-resolve package.nix just needs
+    # overriding to the actual hash from the error; if it's flaky/
+    # unreliable, drop it for good and lean on kdenlive below instead.
+    # davinci-resolve
     kdePackages.kdenlive
     ffmpeg
   ];
