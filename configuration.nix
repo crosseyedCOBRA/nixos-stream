@@ -51,7 +51,12 @@
     # (the proprietary module) is required here, not just the safe default.
     open = false;
     nvidiaSettings = true;
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    # `stable` (the production branch) has moved past Pascal -- confirmed
+    # on the actual hardware, the 595.99.02 installer refused to probe the
+    # GPU and pointed at the 580.xx legacy branch instead. legacy_580 is
+    # nixpkgs' LTSB build (580.178.04, supported through Aug 2028) and is
+    # the correct branch for this GPU going forward.
+    package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
   };
 
   # --- Audio (pipewire) ---
