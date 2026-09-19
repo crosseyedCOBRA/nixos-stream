@@ -64,43 +64,34 @@
     pulse.enable = true;
   };
 
-  # --- Bluetooth ---
-  hardware.bluetooth.enable = true;
-  services.blueman.enable = true;
-
-  # --- X11 + Awesome ---
-  # Awesome is the only WM/DE on this system: chosen over i3, dwm, the
-  # Wayland compositors tried earlier, and the XFCE/Cinnamon DEs tried
-  # for testing, for its native dwindle/master layouts, real mouse-driven
-  # tiling, and per-monitor tags without needing patches.
+  # --- X11 + Cinnamon ---
+  # Switched from a hand-rolled Awesome + quickshell + rofi + picom + dunst
+  # setup to a full, stock desktop environment: less to hand-maintain on a
+  # machine that just needs to reliably run OBS/Resolve/Kdenlive, not be a
+  # tiling-WM daily driver. Cinnamon's NixOS module (services.xserver.
+  # desktopManager.cinnamon) pulls in its own compositor (Muffin), panel,
+  # screen lock (cinnamon-screensaver, with its own PAM service already
+  # wired up by the module), polkit integration, portals, and a full app
+  # suite (Nemo file manager, GNOME Terminal, calculator, text editor,
+  # archive manager, screenshot tool, etc. via services.cinnamon.apps.enable,
+  # on by default) -- see `environment.cinnamon.excludePackages` if any of
+  # that default app set isn't wanted later.
+  #
+  # This also means the desktop-specific hardcoded 3-monitor xrandr setup
+  # and HDMI-mirror handling from the old Awesome/quickshell config doesn't
+  # carry over (it's gone along with those files) -- configure monitors via
+  # Cinnamon's own Settings > Display panel after first login instead.
   services.xserver.enable = true;
-  services.xserver.windowManager.awesome.enable = true;
+  services.xserver.desktopManager.cinnamon.enable = true;
   # Reverted from greetd+tuigreet back to lightdm: greetd's X11 handling
   # (sessions run through tuigreet's `startx` wrapper) turned out to be
   # broken too (sessions opened and crashed within the same second per the
   # journal), and since the Wayland WMs greetd was for are gone, there's no
-  # remaining reason not to go back to the known-good lightdm setup.
+  # remaining reason not to go back to the known-good lightdm setup. The
+  # Cinnamon module defaults lightdm's greeter to Mint's "slick" greeter
+  # automatically once it's enabled below.
   services.xserver.displayManager.lightdm.enable = true;
-  services.displayManager.defaultSession = "none+awesome";
-
-  # Required for i3lock to actually authenticate: this generates
-  # /etc/pam.d/i3lock. Without it, i3lock has no PAM stack to check the
-  # password against and rejects every attempt, correct or not -- the
-  # i3 window manager module sets this automatically, but nothing does
-  # for Awesome, so it must be requested explicitly here.
-  programs.i3lock.enable = true;
-
-  # --- Monitor layout ---
-  # This box's monitor layout isn't known yet -- the desktop config's
-  # hardcoded 3-monitor xrandr setupCommands was deliberately dropped, along
-  # with the matching awesome/rc.lua block and the HDMI-mirror filtering in
-  # quickshell/shell.qml. Once you know this machine's actual output names
-  # (`xrandr --query` after first boot), add a setupCommands block back here
-  # if the default auto-layout isn't what you want.
-
-  # --- Theming ---
-  # Required by home-manager's `dconf.settings` (used for GTK dark mode).
-  programs.dconf.enable = true;
+  services.displayManager.defaultSession = "cinnamon"; # X11 session; see pkgs.cinnamon.passthru.providedSessions
 
   # --- nix-ld ---
   # Patches the dynamic loader for non-Nix binaries, e.g. compiled wheels
@@ -108,13 +99,11 @@
   # otherwise can't find their libs since NixOS has no /lib64/ld-linux.
   programs.nix-ld.enable = true;
 
-  # --- Flatpak + desktop portals ---
+  # --- Flatpak ---
+  # No manual xdg.portal block needed here: the Cinnamon module above
+  # already enables xdg-desktop-portal with the xapp + gtk portal backends
+  # and its own config package.
   services.flatpak.enable = true;
-  xdg.portal = {
-    enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-    config.common.default = "*";
-  };
 
   # --- Fonts ---
   # Trimmed to what's actually referenced (alacritty/rofi use JetBrainsMono

@@ -1,5 +1,5 @@
 {
-  description = "Mike's stream PC NixOS configuration - Awesome + home-manager";
+  description = "Mike's stream PC NixOS configuration - Cinnamon + home-manager";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -13,11 +13,6 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
-    };
-
-    quickshell = {
-      url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nix-flatpak.url = "github:gmodena/nix-flatpak";
