@@ -1,0 +1,53 @@
+// Matches the wallpaper palette used across quickshell/rofi/Awesome
+// (deep space navy, nebula blue/purple, warm cloud orange, coral pink).
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "type": "auto",
+        "color": {
+            "1": "#7aa2f7",
+            "2": "#9d7cd8"
+        },
+        "padding": {
+            "top": 1,
+            "right": 3
+        }
+    },
+    "display": {
+        "separator": " ",
+        "color": {
+            "keys": "#565f89",
+            "title": "#7aa2f7",
+            "output": "#c0caf5",
+            "separator": "#292e42"
+        },
+        "bar": {
+            "width": 12,
+            "char": {
+                "elapsed": "■",
+                "total": "░"
+            }
+        }
+    },
+    "modules": [
+        { "type": "title", "color": { "user": "#7aa2f7", "at": "#565f89", "host": "#9d7cd8" } },
+        "separator",
+        { "type": "os", "keyColor": "#7aa2f7" },
+        { "type": "host", "keyColor": "#7aa2f7" },
+        { "type": "kernel", "keyColor": "#9d7cd8" },
+        { "type": "uptime", "keyColor": "#9d7cd8" },
+        { "type": "packages", "keyColor": "#f7768e" },
+        { "type": "shell", "keyColor": "#f7768e" },
+        "break",
+        { "type": "wm", "keyColor": "#ff9e64" },
+        { "type": "terminal", "keyColor": "#ff9e64" },
+        { "type": "cpu", "keyColor": "#7aa2f7" },
+        { "type": "gpu", "keyColor": "#7aa2f7" },
+        { "type": "memory", "keyColor": "#f7768e" },
+        { "type": "disk", "keyColor": "#f7768e" },
+        { "type": "localip", "keyColor": "#565f89" },
+        { "type": "locale", "keyColor": "#565f89" },
+        "break",
+        "colors"
+    ]
+}
