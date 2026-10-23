@@ -1,5 +1,16 @@
 { config, pkgs, lib, username, inputs, ... }:
 
+let
+  # See flake.nix's `nixpkgs-davinci-resolve` input comment: davinci-resolve
+  # is pulled from a separately-pinned nixpkgs commit instead of the main
+  # `nixpkgs` input, to dodge a Blackmagic-side hash drift on the package's
+  # fixed-output source fetch. Needs its own allowUnfree since it's a
+  # fully separate pkgs instantiation from the main `pkgs` argument above.
+  davinciPkgs = import inputs.nixpkgs-davinci-resolve {
+    inherit (pkgs) system;
+    config.allowUnfree = true;
+  };
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -29,6 +40,28 @@
 
   # --- Nix / nixpkgs ---
   nixpkgs.config.allowUnfree = true; # non-free software allowed
+  nixpkgs.overlays = [
+    # nixpkgs' obs-studio postFixup adds /run/opengl-driver to the RUNPATH
+    # of obs-nvenc.so itself (via addDriverRunpath), but misses the
+    # separate obs-nvenc-test helper binary that obs-nvenc.so spawns as a
+    # subprocess to *probe* NVENC support before OBS will show the
+    # encoder in its UI at all. Without this, that helper can't dlopen
+    # libnvidia-encode.so.1 ("Cannot load libnvidia-encode.so.1" in OBS's
+    # log, confirmed by running `obs-nvenc-test` directly on this
+    # machine), the probe reports nvenc_supported=false, and NVENC never
+    # appears as an encoder option even though the actual NVENC plugin
+    # and driver are both fine -- confirmed working once this binary's
+    # RUNPATH includes /run/opengl-driver/lib by hand. Still true as of
+    # current nixos-unstable, so patch it here rather than wait on
+    # upstream.
+    (final: prev: {
+      obs-studio = prev.obs-studio.overrideAttrs (old: {
+        postFixup = (old.postFixup or "") + ''
+          addDriverRunpath $out/bin/.obs-nvenc-test-wrapped
+        '';
+      });
+    })
+  ];
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.settings.auto-optimise-store = true;
   nix.gc = {
@@ -159,6 +192,11 @@
     # which the `hardware.nvidia` block above populates. So nothing is missing
     # versus the Flatpak. Wrapped together via wrapOBS so the plugins
     # actually get picked up (OBS_PLUGINS_PATH).
+    #
+    # NVENC not showing up in OBS's encoder list despite all of the above
+    # was a separate nixpkgs packaging gap in the obs-nvenc-test helper
+    # binary's RUNPATH -- see the obs-studio overlay up in the Nix/nixpkgs
+    # section for the actual fix/explanation.
     (wrapOBS {
       plugins = with obs-studio-plugins; [
         obs-aitum-multistream # multi-platform simulcasting
@@ -184,15 +222,17 @@
     # x264/x265/VP8/VP9/AV1(decode)/Opus/AAC/MP3, plus NVENC/NVDEC since
     # this box has an NVIDIA GPU (verified in nixpkgs' ffmpeg derivation).
     #
-    # davinci-resolve commented out for now: its fixed-output derivation
-    # (nixpkgs scripts Blackmagic's own download API live at build time
-    # rather than fetching a pinned tarball URL) hit a SHA256 hash
-    # mismatch building on the actual stream PC hardware. Re-enable once
-    # that's root-caused/retested -- if it's a one-time drift the pinned
-    # `outputHash` in nixpkgs' davinci-resolve package.nix just needs
-    # overriding to the actual hash from the error; if it's flaky/
-    # unreliable, drop it for good and lean on kdenlive below instead.
-    # davinci-resolve
+    # Root-caused the earlier SHA256 hash mismatch: it was a one-time
+    # drift, not a flaky/broken fetch. Blackmagic re-hosted a new
+    # installer file under the already-released "21.1" version string, so
+    # nixpkgs' pinned hash for that fetch (current as of this config's
+    # main `nixpkgs` pin) no longer matched. Confirmed by reproducing the
+    # live fetch+hash by hand and finding nixpkgs had already fixed it
+    # upstream (version bump to 21.1.1, new hash) in a commit newer than
+    # this config's main nixpkgs pin -- pulled from there via the
+    # `davinciPkgs` instance above instead of waiting on/forcing a full
+    # nixpkgs bump for the whole system.
+    davinciPkgs.davinci-resolve
     kdePackages.kdenlive
     ffmpeg
   ];

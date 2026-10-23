@@ -69,6 +69,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-davinci-resolve": {
+      "locked": {
+        "lastModified": 1791810085,
+        "narHash": "sha256-cSfqp7kery7HoruCeENynEu60D8wiwF4d+BMbeRsQ9Q=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "134e02770b7d23bcb1a7dcd763580e5d75a8b4e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "134e02770b7d23bcb1a7dcd763580e5d75a8b4e9",
+        "type": "github"
+      }
+    },
     "nixpkgs-lib": {
       "locked": {
         "lastModified": 1782614948,
@@ -89,6 +105,7 @@
         "home-manager": "home-manager",
         "nix-flatpak": "nix-flatpak",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-davinci-resolve": "nixpkgs-davinci-resolve",
         "xlibre-overlay": "xlibre-overlay",
         "zen-browser": "zen-browser"
       }

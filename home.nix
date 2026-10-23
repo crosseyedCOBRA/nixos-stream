@@ -47,8 +47,8 @@ in
       package = pkgs.gnome-themes-extra;
     };
     iconTheme = {
-      name = "Adwaita";
-      package = pkgs.adwaita-icon-theme;
+      name = "Papirus-Dark";
+      package = pkgs.papirus-icon-theme;
     };
     colorScheme = "dark";
   };
@@ -76,6 +76,13 @@ in
     picture-uri = "file://${wallpaper}";
     picture-options = "zoom";
   };
+
+  # Cinnamon reads its own icon theme from this key (Nemo, panel, menu,
+  # applets) rather than the gtk.iconTheme settings.ini above -- same
+  # reason the wallpaper needs the dconf override above instead of being
+  # left to Cinnamon's own default (Mint-Y here, since it ships with
+  # services.cinnamon.apps.enable's default app set).
+  dconf.settings."org/cinnamon/desktop/interface".icon-theme = "Papirus-Dark";
 
   programs.home-manager.enable = true;
 
