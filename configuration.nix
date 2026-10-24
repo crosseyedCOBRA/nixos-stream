@@ -31,6 +31,10 @@ in
   # --- Networking ---
   networking.hostName = "nixosStream"; # keep in sync with flake.nix's `hostname` let-binding
   networking.networkmanager.enable = true;
+  # Fully disabled, not just port-opened -- every listening service on
+  # this machine is unfiltered from the network as a result. Deliberate
+  # choice made 2026-10-23; revisit if this box's exposure changes.
+  networking.firewall.enable = false;
 
   # --- Locale / time ---
   time.timeZone = "America/New_York"; # change to your timezone
