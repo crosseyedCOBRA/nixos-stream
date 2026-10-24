@@ -177,4 +177,20 @@ in
 
   xdg.enable = true;
   xdg.configFile."fastfetch/config.jsonc".source = ./fastfetch/config.jsonc;
+
+  # The AppImage itself (~/Applications/SocialStreamNinja.AppImage) is a
+  # manually-downloaded file, not something Nix manages -- see the
+  # appimage-run comment in configuration.nix's systemPackages for why.
+  # This just gives it a normal Cinnamon menu entry instead of needing a
+  # terminal every time.
+  xdg.desktopEntries.social-stream-ninja = {
+    name = "Social Stream Ninja";
+    comment = "Combined Twitch/YouTube/Kick chat for streaming";
+    exec = "appimage-run /home/mike/Applications/SocialStreamNinja.AppImage";
+    terminal = false;
+    # Plain "Video" isn't a valid category without "AudioVideo" alongside
+    # it (desktop-file-validate flags it as will-be-fatal) -- Cinnamon's
+    # menu was silently dropping the whole entry over this.
+    categories = [ "Network" ];
+  };
 }

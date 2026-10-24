@@ -245,6 +245,19 @@ in
     davinciPkgs.davinci-resolve
     kdePackages.kdenlive
     ffmpeg
+
+    # --- Social Stream Ninja ---
+    # Merges Twitch/YouTube/Kick chat into one feed: an OBS browser-source
+    # overlay here, and a combined chat dock viewable from any browser
+    # (the gaming PC, over the same session). Ships as either a Chrome
+    # extension or a standalone Electron desktop app -- the extension is
+    # out since this config's browser is Zen (Firefox-based), so it's the
+    # desktop app's Linux AppImage instead. Upstream only publishes
+    # AppImages (no nixpkgs package, no stable per-version download URL to
+    # pin a fetchurl hash against -- releases are frequent), so it's run
+    # via appimage-run against a manually-downloaded file rather than
+    # packaged as a proper Nix derivation.
+    appimage-run
   ];
 
   # Companion setting for hardware.nvidia.videoAcceleration (defaults to
