@@ -2,6 +2,31 @@
 
 let
   wallpaper = ./assets/wallpaper.jpg;
+
+  # Shared between programs.bash and programs.fish below so bash (kept
+  # around for compat/scripts) and fish (the actual login shell) don't
+  # drift out of sync with each other.
+  shellAliases = {
+    # Applies configuration.nix/home.nix changes without touching flake
+    # inputs (flake.lock) -- this is the one to run after editing either
+    # file, day to day.
+    rebuild = "sudo nixos-rebuild switch --flake /home/mike/nixos-stream#nixosStream";
+    # Updates every flake input (nixpkgs, home-manager, nix-flatpak,
+    # xlibre-overlay, zen-browser) to its latest commit and rewrites
+    # flake.lock -- does NOT apply anything by itself, just bumps
+    # versions; follow with `rebuild` to actually rebuild against them.
+    # Leaves nixpkgs-davinci-resolve alone since that input is pinned to
+    # a single exact commit (see flake.nix), not a branch, so there's
+    # nothing for `flake update` to move there anyway.
+    update = "nix flake update --flake /home/mike/nixos-stream";
+    # The common case: update inputs, rebuild against them, and update
+    # Flatpaks too (services.flatpak.enable's own packages aren't
+    # touched by either flake update or nixos-rebuild -- Flatpak manages
+    # that store independently). Spelled out in full (not
+    # "update && rebuild") so it doesn't depend on the shell having
+    # already expanded those other two aliases in this session.
+    upgrade = "nix flake update --flake /home/mike/nixos-stream && sudo nixos-rebuild switch --flake /home/mike/nixos-stream#nixosStream && flatpak update -y";
+  };
 in
 {
   home.username = username;
@@ -86,33 +111,23 @@ in
 
   programs.home-manager.enable = true;
 
-  # `shell = pkgs.bash;` on the user account in configuration.nix is just
-  # the login shell -- these aliases need home-manager's own bash
-  # integration enabled to actually land in ~/.bashrc.
+  # Kept enabled even though fish (below) is the actual login shell now --
+  # covers `bash -i`/scripts that explicitly want bash with these aliases
+  # too, and costs nothing to leave on.
   programs.bash = {
     enable = true;
-    shellAliases = {
-      # Applies configuration.nix/home.nix changes without touching flake
-      # inputs (flake.lock) -- this is the one to run after editing either
-      # file, day to day.
-      rebuild = "sudo nixos-rebuild switch --flake /home/mike/nixos-stream#nixosStream";
-      # Updates every flake input (nixpkgs, home-manager, nix-flatpak,
-      # xlibre-overlay, zen-browser) to its latest commit and rewrites
-      # flake.lock -- does NOT apply anything by itself, just bumps
-      # versions; follow with `rebuild` to actually rebuild against them.
-      # Leaves nixpkgs-davinci-resolve alone since that input is pinned to
-      # a single exact commit (see flake.nix), not a branch, so there's
-      # nothing for `flake update` to move there anyway.
-      update = "nix flake update --flake /home/mike/nixos-stream";
-      # The common case: update inputs, rebuild against them, and update
-      # Flatpaks too (services.flatpak.enable's own packages aren't
-      # touched by either flake update or nixos-rebuild -- Flatpak manages
-      # that store independently). Spelled out in full (not
-      # "update && rebuild") so it doesn't depend on bash having already
-      # expanded those other two aliases in this shell session.
-      upgrade = "nix flake update --flake /home/mike/nixos-stream && sudo nixos-rebuild switch --flake /home/mike/nixos-stream#nixosStream && flatpak update -y";
-    };
+    inherit shellAliases;
   };
+
+  # The actual login shell (configuration.nix sets `shell = pkgs.fish;` on
+  # the user account; programs.fish.enable there just registers it in
+  # /etc/shells -- this is what actually configures it).
+  programs.fish = {
+    enable = true;
+    inherit shellAliases;
+  };
+
+  programs.starship.enable = true;
 
   programs.git = {
     enable = true;

@@ -160,12 +160,18 @@ in
   # --- zram swap ---
   zramSwap.enable = true;
 
+  # --- Shell ---
+  # Needs to be enabled as a system program (not just installed via
+  # home.packages/home-manager) so it's registered in /etc/shells --
+  # otherwise `shell = pkgs.fish;` below and chsh both refuse it.
+  programs.fish.enable = true;
+
   # --- User account ---
   users.users.${username} = {
     isNormalUser = true;
     description = username;
     extraGroups = [ "wheel" "networkmanager" "video" "audio" "input" ];
-    shell = pkgs.bash;
+    shell = pkgs.fish;
   };
   # No password is set here. After the first rebuild, log in at the TTY
   # and run `passwd` to set one (or `passwd mike` as root).
