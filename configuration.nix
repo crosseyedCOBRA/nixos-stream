@@ -243,8 +243,19 @@ in
     # `davinciPkgs` instance above instead of waiting on/forcing a full
     # nixpkgs bump for the whole system.
     davinciPkgs.davinci-resolve
-    kdePackages.kdenlive
     ffmpeg
+
+    # kdePackages.kdenlive (nixpkgs build) was the original fallback here,
+    # but dropped 2026-10-31 after it crashed mid-edit: coredump showed a
+    # genuine heap-corruption abort inside FFmpeg's threaded H.264 decoder
+    # (frame_worker_thread -> h264_decode_frame -> ff_thread_get_ext_buffer
+    # -> malloc_printerr), triggered via MLT's libmltavformat.so, which
+    # nixpkgs' `mlt` derivation pins to its own ffmpeg (8.1.3) independent
+    # of kdenlive's own direct ffmpeg-full link (9.0.2) -- not a config or
+    # project-file issue, a decoder bug in that specific ffmpeg build.
+    # Switched to the Flatpak build instead (installed imperatively, see
+    # the Flatpak section below) on the chance its bundled ffmpeg doesn't
+    # hit the same path; not a confirmed fix, just the next thing to try.
 
     # --- Social Stream Ninja ---
     # Merges Twitch/YouTube/Kick chat into one feed: an OBS browser-source
