@@ -79,6 +79,16 @@ in
     enable = true;
     enable32Bit = true; # 32-bit libs
   };
+  # Stock X.Org. A third-party overlay swapping this for the XLibre fork
+  # was tried and dropped 2026-11-08: its xlibre-xserver derivation reused
+  # nixpkgs' own xorg-server patch set applied against XLibre's unrelated
+  # source tree, so any routine nixpkgs update that touched those patches
+  # (not even an XLibre version change) could break the build -- hit this
+  # exactly once and confirmed there's no way to isolate it from the main
+  # `nixpkgs` input (NixOS's xserver module has no `package`-style option;
+  # the overlay works by replacing the global `xorg-server` attribute in
+  # place, so there's no override point short of pinning the *whole*
+  # system's nixpkgs, which defeats being able to update normally).
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia = {
     modesetting.enable = true;
